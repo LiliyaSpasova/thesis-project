@@ -24,9 +24,6 @@ def hello_smile():
         dim_sizes[i] = net.get_outcome_count(parents[i])
         dim_sizes[len(dim_sizes) - 1] = net.get_outcome_count(node_handle)    
 
-
-
-
 def sens_analysis(target_node,parameter):
     target_node_id=target_node.key
     parameter_node_id=parameter.key()
