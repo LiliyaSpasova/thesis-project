@@ -39,4 +39,6 @@ class Tutorial2:
             net.update_beliefs()
             self.print_all_posteriors(net)
             print()
+
+            
 t = Tutorial2()

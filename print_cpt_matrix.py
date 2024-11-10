@@ -77,4 +77,4 @@ net.read_file("Brain_Tumor.xdsl")
         
         
 print("Tutorial3 complete.")
-tutorial.print_cpt_matrix(net,"C")
+tutorial.print_cpt_matrix(net,"SH")
