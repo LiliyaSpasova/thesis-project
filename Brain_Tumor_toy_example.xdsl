@@ -17,7 +17,7 @@
 			<state id="True" />
 			<state id="False" />
 			<parents>MC</parents>
-			<probabilities>0.8 0.2 0.2 0.8</probabilities>
+			<probabilities>0.2 0.8 0.1 0.9</probabilities>
 		</cpt>
 		<cpt id="C">
 			<state id="True" />

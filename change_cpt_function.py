@@ -1,48 +1,65 @@
 import pysmile
 import pysmile_license
-import equation_solver
+import coefficient_calculator
 import numpy as np
-epsilon=0.05
-def update_cpt_with_epsilon(net,node_name):
-    
+from plots import plot_rational_functions
+from linear_system_solver import solve_system
+from cpt_querys  import *
+
+def update_cpt_with_epsilon(net,parameter,target,epsilon):
     res=[]
+    node_name, _ = list(parameter['probability'].items())[0]
+
+    target_node_name, _ = list(parameter['probability'].items())[0]
+    _,index=get_value_and_index_param(net,parameter)
     for i in range(4):
         cpt = net.get_node_definition(node_name)
-        print(cpt)
-        cpt[0]-=epsilon
+        cpt[index]-=epsilon
         cpt[1]+=epsilon
         net.set_node_definition(node_name,cpt)
-        #cpt = net.get_node_definition(node_name)
-        #print(cpt)
-        net.set_evidence("ISC","True")
+        
+        target_node_name, target_given = target['probability'],target['given']
+        for g in target_given:
+            node=g[0]
+            value=g[1]
+            net.set_evidence(node,value)
+        #net.set_evidence("ISC","True")
         net.update_beliefs()
-        beliefs = net.get_node_value("MC")
+        beliefs = net.get_node_value(target_node_name)
        # print(beliefs)
         res.append((cpt[0],beliefs[0]))
     return res
 
-def round_list_to_2_decimals(values):
+def round_point_values(values):
     res=[]
     for (x,y) in values:
-        res.append((round(x,2),round(y,2)))
+        res.append((round(x,4),round(y,4)))
+    return res
+def round_plot_params(values):
+    res=[]
+    for (a,b,c,d) in values:
+        res.append((round(a,4),round(b,4),round(c,4),round(d,4)))
     return res
 net = pysmile.Network()
         
 net.read_file("Brain_Tumor.xdsl")
-sample_values=update_cpt_with_epsilon(net,"ISC")
-sample_values=round_list_to_2_decimals(sample_values)
-coefficients = []
-for (x,y) in sample_values:
-    coefficients.append(equation_solver.get_coefficients_1_way(x,y))
-coefficients.pop(0)
+plots_params=[]
+plot_points=[]
+epsilons=[0.1,0.12]
+parameter = {'probability': {'ISC': 'False'}, 'given': {'MC': 'True'}}
+target =  {'probability': {'MC': 'True'}, 'given': {'ISC': 'True'}}
+for e in epsilons:
+    points=update_cpt_with_epsilon(net,parameter,target,e)
+    points=round_point_values(points)
+    plot_points.append(points)
+    coefficients = []
+    for (x,y) in points:
+         coefficients.append(coefficient_calculator.get_coefficients_1_way(x,y))
+    plots_params.append(solve_system(coefficients))
 
-for (a,b,c,d) in coefficients:
-    #ax+b -x*y*c-y*d=0
-    #result = 0.75 * 0.993 - 0.001 - 0.75 * 0.48 - 0.48 * 0.786
-    print  (a*0.993 - 0.001 + c + d* 0.786)
-print(np.linalg.lstsq(coefficients,[0,0,0]))
-#print(np.linalg.solve([[0.25,1],[0.3,1]],[0.375,0.38]))
+plots_params.append([0.993,0.001,1,0.786])
 
+plot_rational_functions(plots_params=round_plot_params(plots_params))
 
 
 
