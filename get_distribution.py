@@ -52,7 +52,7 @@ def coords_to_index(coords, dim_sizes):
         factor *= dim_sizes[i]
     return index
 
-def query_cpt_with_indices(cpt_dict, parent_values, net, node_name):
+def get_distribution(net,parameter):
     """
     Queries a CPT dictionary for all outcomes of a node, including the indices in the original CPT.
     
@@ -65,48 +65,43 @@ def query_cpt_with_indices(cpt_dict, parent_values, net, node_name):
     Returns:
     - A dictionary with outcomes as keys, each containing a tuple with (probability, index).
     """
+    node_name, _ = parameter['probability']
+    if 'given' in parameter:
+        parent_values_new=parameter['given']
+    else:
+        parent_values_new=None
+    cpt_dict= get_cpt_dict(net, net.get_node(node_name))
+    
     node_handle = net.get_node(node_name)
     dim_sizes = [net.get_outcome_count(parent) for parent in net.get_parents(node_handle)] + [net.get_outcome_count(node_handle)]
     
     # List all outcomes for the target node
     results = {}
-    for outcome in net.get_outcome_ids(node_handle):
-        # Build the query key for the (parent configuration, outcome)
-        query_key = (tuple(parent_values), outcome)
-        
-        # Check if the key is in the CPT dictionary
-        if query_key in cpt_dict:
-            prob = cpt_dict[query_key]
-            
-            # Calculate the index in the original CPT for this outcome
-            coords = []
-            for parent_id, parent_value in parent_values:
-                parent_handle = next(p for p in net.get_parents(node_handle) if net.get_node_id(p) == parent_id)
-                coords.append(net.get_outcome_ids(parent_handle).index(parent_value))
-            
-            coords.append(net.get_outcome_ids(node_handle).index(outcome))
-            original_index = coords_to_index(coords, dim_sizes)
-            
+    if parent_values_new is not None:
+        for outcome in net.get_outcome_ids(node_handle):
+            # Build the query key for the (parent configuration, outcome)
+                query_key = (tuple(parent_values_new), outcome)
+                # Check if the key is in the CPT dictionary
+                if query_key in cpt_dict:
+                    prob = cpt_dict[query_key]
+                    
+                    # Calculate the index in the original CPT for this outcome
+                    coords = []
+                    for parent_id, parent_value in parent_values_new:
+                        parent_handle = next(p for p in net.get_parents(node_handle) if net.get_node_id(p) == parent_id)
+                        coords.append(net.get_outcome_ids(parent_handle).index(parent_value))
+                    
+                    coords.append(net.get_outcome_ids(node_handle).index(outcome))
+                    original_index = coords_to_index(coords, dim_sizes)
+                    
+                    # Store the probability and its index in the results
+                    results[outcome] = (prob, original_index)
+                else:
+                    results[outcome] = ("Configuration not found", None)
+    else:
+        for index, (key, value) in enumerate(cpt_dict.items()):
             # Store the probability and its index in the results
-            results[outcome] = (prob, original_index)
-        else:
-            results[outcome] = ("Configuration not found", None)
-    
+            results[key[1]] = (value, index)
     return results
 
-# Load and process the network
-net = pysmile.Network()
-net.read_file("Brain_Tumor.xdsl")
 
-# Load the original CPT for a specific node
-node_name = "SH"
-
-# Get the CPT dictionary
-SH_CPT = get_cpt_dict(net, net.get_node(node_name))
-
-# Query the CPT for both 'True' and 'False' outcomes given a specific parent configuration
-parent_values = [('B', 'True')]
-result = query_cpt_with_indices(SH_CPT, parent_values, net, node_name)
-
-print("Probabilities and original indices for outcomes given parent configuration:")
-print(result)

@@ -36,21 +36,6 @@ def get_value_and_index_param(net, parameter):
     return probability, index
 
 def get_outcome_indices(net, parameter):
-    """
-    Retrieves the indices in the CPT for all possible outcomes of a specified node, 
-    given fixed conditions on its parent nodes.
-
-    Parameters:
-    - net: The network object from PySmile.
-    - parameter: Dictionary with 'probability' specifying the target node
-                 and 'given' specifying parent conditions.
-                 e.g., {'probability': {'ISC': 'any'}, 'given': {'MC': 'True'}}
-
-    Returns:
-    - A dictionary where each key is an outcome, and each value is the index in the CPT.
-      Example:
-      {'True': 5, 'False': 6}
-    """
     # Extract the target node from parameter['probability']
     node_name = list(parameter['probability'].keys())[0]
     given_conditions = parameter['given']
@@ -103,9 +88,3 @@ def product(*args):
                 result.append((x,) + y)
         return result
 
-# Example usage
-net = pysmile.Network()
-net.read_file("Brain_Tumor_toy_example.xdsl")
-parameter = {'probability': {'ISC': 'any'}, 'given': {'MC': 'True'}}
-outcome_data = get_outcome_indices(net, parameter)
-print("Outcome Data:", outcome_data)

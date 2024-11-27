@@ -102,7 +102,7 @@ def query_cpt_with_indices(cpt_dict, parent_values, original_cpt, dim_sizes, net
 
 # Load and process the network
 net = pysmile.Network()
-net.read_file("Brain_Tumor.xdsl")
+net.read_file("Brain_Tumor_toy_example.xdsl")
 
 # Load the original CPT for a specific node
 node_handle = "ISC"

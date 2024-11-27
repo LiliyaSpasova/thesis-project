@@ -8,7 +8,7 @@ def solve_system(coefficients):
     U, S, Vh = np.linalg.svd(coefficients)
 
 # Find the null space of the matrix (solutions to Ax = 0)
-    null_space = Vh[np.where(S < 0.007)].T  # Adjust the tolerance as needed
+    null_space = Vh[np.where(S < 0.05)].T  # Adjust the tolerance as needed
 
     # Generate a non-trivial solution by scaling a vector from the null space
     solution = null_space[:, 0]   # Scale the first vector, adjust the scale as needed
