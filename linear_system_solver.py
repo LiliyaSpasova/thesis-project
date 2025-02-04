@@ -25,3 +25,32 @@ coefficients = np.array([
     [0.6, 1, -0.258, -0.43]
 ])
 
+import numpy as np
+
+# Calculate the SVD of the coefficient matrix and solve Ax = b
+def solve_system_without_evidence(coefficients, b):
+    # Perform SVD on the coefficient matrix
+    U, S, Vh = np.linalg.svd(coefficients)
+
+    # Invert the singular values (regularization to avoid division by zero)
+    tolerance = 1e-5  # Adjust tolerance as needed for numerical stability
+    S_inv = np.zeros_like(S)
+    
+    # Invert the singular values, replacing very small values with zeros (for numerical stability)
+    S_inv[S > tolerance] = 1 / S[S > tolerance]
+    
+    # Solve the system using the pseudoinverse formula: x = V * S_inv * U.T * b
+    solution = Vh.T @ np.diag(S_inv) @ U.T @ b
+    
+    return solution
+
+
+
+coefficients=np.array([
+[0.7,1],
+[0.4,1]
+])
+# Define the right-hand side vector b (for example, a non-zero vector)
+b = np.array([0.335,0.326])
+
+
